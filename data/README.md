@@ -15,5 +15,3 @@ Generate processed public-state data with:
 ```bash
 DATA_DIR=data_public python preprocess.py
 ```
-
-The generated `.npz` files and `count.json` are ignored by git.

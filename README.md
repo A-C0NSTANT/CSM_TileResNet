@@ -1,42 +1,40 @@
 # CSM_TileResNet
 
-Supervised-learning Mahjong agent for Chinese Standard Mahjong / ????. The project starts from the course baseline CNN policy and iteratively improves it with a tile-structure-aware ResNet backbone, public-state features, tile-level public fusion, suit permutation augmentation, and a larger backbone variant.
+Supervised-learning agent for Chinese Standard Mahjong. The project starts from a course baseline CNN policy and iteratively improves it with a tile-structure-aware ResNet backbone, public-state features, tile-level public fusion, suit permutation augmentation, and a larger backbone variant.
 
 ## Highlights
 
 - Legal action space with 235 actions: `Pass`, `Hu`, `Play`, `Chi`, `Peng`, `Gang`, `AnGang`, `BuGang`.
-- Rule-generated action mask is applied in every model forward pass to avoid illegal actions.
-- Structured observation: private/public tile grid `6 x 4 x 9`, public-state vector `442`, and action mask `235`.
+- Rule-generated action masks are applied in every model forward pass to avoid illegal actions.
+- Structured inputs: tile grid `6 x 4 x 9`, public-state vector `442`, and action mask `235`.
 - Main model: `rarn_public_v2`, a Rank-Aware ResNet with structured public-state mid-fusion.
 - Final experimental model: `rarn_public_v2_large`, a deeper `1.49x` backbone variant with online suit augmentation.
-- Includes preprocessing, supervised training, offline evaluation, local arena utilities, and Botzone-style inference entrypoint.
+- Includes preprocessing, supervised training, offline evaluation, local arena utilities, and a Botzone-style inference entrypoint.
 
 ## Repository Layout
 
 ```text
 .
-??? __main__.py                  # Botzone-style inference entrypoint
-??? agent.py                     # Agent interface base class
-??? feature.py                   # Mahjong feature encoder and action mapping
-??? dataset.py                   # Dataset loader and suit augmentation
-??? model.py                     # CNN / ResNet / RARN / RARN public v2 models
-??? preprocess.py                # Raw log to .npz preprocessing
-??? supervised.py                # Supervised training script
-??? history_features.py          # Historical-feature helpers kept for experiments
-??? evaluation/
-?   ??? eval_supervised.py       # Offline supervised metrics
-??? eval/
-?   ??? arena/                   # Local arena evaluation utilities
-?   ??? models/rarn_public_v2/   # Deployable model-code snapshot
-??? AgentDocs/                   # Experiment notes and stage summaries
-??? data/                        # Sample data and data-format notes only
-??? checkpoints/                 # Placeholder only; real checkpoints are not tracked
-??? third_party/                 # Botzone Mahjong environment dependency
+|-- __main__.py                  # Botzone-style inference entrypoint
+|-- agent.py                     # Agent interface base class
+|-- feature.py                   # Mahjong feature encoder and action mapping
+|-- dataset.py                   # Dataset loader and suit augmentation
+|-- model.py                     # CNN / ResNet / RARN / RARN public v2 models
+|-- preprocess.py                # Raw log to .npz preprocessing
+|-- supervised.py                # Supervised training script
+|-- history_features.py          # Historical-feature helpers kept for experiments
+|-- evaluation/
+|   `-- eval_supervised.py       # Offline supervised metrics
+|-- eval/
+|   |-- arena/                   # Local arena evaluation utilities
+|   `-- models/rarn_public_v2/   # Deployable model-code snapshot
+|-- AgentDocs/                   # Experiment notes and stage summaries
+|-- data/                        # Sample data and data-format notes only
+|-- checkpoints/                 # Placeholder only; real checkpoints are not tracked
+`-- third_party/                 # Botzone Mahjong environment dependency
 ```
 
 ## Environment
-
-Create the minimal CPU environment:
 
 ```bash
 conda env create -f environment.yml
@@ -44,8 +42,6 @@ conda activate csmj-arena
 ```
 
 For GPU training, install a CUDA-enabled PyTorch build matching your machine, then keep the remaining dependencies from `environment.yml`.
-
-The project depends on `PyMahjongGB` for rule checks in feature extraction.
 
 ## Data
 
@@ -68,31 +64,11 @@ $env:DATA_DIR="data_public"
 python preprocess.py
 ```
 
-The generated directory should contain:
-
-```text
-data_public/
-??? count.json
-??? 0.npz
-??? 1.npz
-??? ...
-```
-
-Each `.npz` file stores `obs`, `mask`, `public`, and `act` arrays.
+The generated directory should contain `count.json` and per-match `.npz` files.
 
 ## Models
 
-Supported model names include:
-
-- `cnn`
-- `resnet`
-- `rarn`
-- `rarn_v2`
-- `rarn_public`
-- `rarn_public_v2`
-- `rarn_public_v2_large` / `rarn_public_v2_1_5x`
-
-Key final variants:
+Supported final variants:
 
 | Model | Params | Description |
 | --- | ---: | --- |
@@ -102,21 +78,6 @@ Key final variants:
 `rarn_public_v2_large` keeps the same channel width as `rarn_public_v2`, so most base checkpoint weights can be loaded directly and only the extra residual blocks are randomly initialized.
 
 ## Training
-
-Base `rarn_public_v2` training:
-
-```bash
-python supervised.py \
-  --model rarn_public_v2 \
-  --data-dir data_public \
-  --output-dir checkpoints/rarn_public_v2 \
-  --epochs 20 \
-  --batch-size 2048 \
-  --lr 7e-4 \
-  --num-workers 2
-```
-
-Final large model with suit augmentation and base-checkpoint initialization:
 
 ```bash
 python supervised.py \
@@ -154,17 +115,6 @@ python evaluation/eval_supervised.py \
   --num-workers 2
 ```
 
-Smoke evaluation:
-
-```bash
-python evaluation/eval_supervised.py \
-  --model rarn_public_v2_large \
-  --data-dir data_public \
-  --checkpoint checkpoints/rarn_public_v2_large_aug/rarn_public_v2_large_model_latest.pkl \
-  --output-dir evaluation/results/smoke \
-  --max-samples 10000
-```
-
 ## Deployment
 
 `__main__.py` is a Botzone-style interactive entrypoint:
@@ -173,11 +123,7 @@ python evaluation/eval_supervised.py \
 python __main__.py checkpoints/rarn_public_v2_large_aug/rarn_public_v2_large_model_latest.pkl rarn_public_v2_large
 ```
 
-If the model name is omitted, the script tries to infer it from the checkpoint filename.
-
 ## Reported Results
-
-The main experiment notes are in `AgentDocs/`. Key recorded results:
 
 | Model | Validation Loss | Top-1 | Top-3 | Top-5 | Arena Summary |
 | --- | ---: | ---: | ---: | ---: | --- |
