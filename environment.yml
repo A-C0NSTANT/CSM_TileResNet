@@ -1,0 +1,17 @@
+name: csmj-arena
+channels:
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - numpy
+  - pyyaml
+  - tqdm
+  - scipy
+  - pandas
+  - pytest
+  - pytorch
+  - cpuonly
+  - pip:
+      - PyMahjongGB==1.3.0

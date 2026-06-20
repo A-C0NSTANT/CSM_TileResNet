@@ -1,0 +1,35 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Training data and generated datasets
+data/data.txt
+data_public/
+data_public_*/
+*.npz
+count.json
+
+# Checkpoints and model artifacts
+checkpoints/*
+!checkpoints/README.md
+*.pkl
+*.pt
+*.pth
+
+# Logs and evaluation outputs
+log/
+logs/
+evaluation/results/
+eval/results/
+*.log
+
+# Local tooling
+.vscode/
+.idea/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# OS files
+.DS_Store
+Thumbs.db
